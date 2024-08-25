@@ -36,10 +36,6 @@ func New(
 		o(&g)
 	}
 
-	if g.nOfRounds < minNOfRounds {
-		return nil, ErrTooFewRounds
-	}
-
 	chain, err := hashChain(seed, g.nOfRounds)
 	if err != nil {
 		return nil, err
