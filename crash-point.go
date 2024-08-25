@@ -46,10 +46,6 @@ func (g *Game) CrashPoint() ([]byte, float64, error) {
 	return roundHash[:], crashPoint, nil
 }
 
-func (g *Game) roundHash() []byte {
-	return g.roundHashes[g.roundIndex : g.roundIndex+nOfBytesInHash]
-}
-
 // CrashPoint return the crash round for the given round hash, salt,
 // and the instant crash rate.
 func CrashPoint(
@@ -78,4 +74,8 @@ func isDivisible(hash []byte, modulo int) bool {
 	remainder := new(big.Int).Mod(hashInt, mod)
 
 	return remainder.Cmp(big.NewInt(0)) == 0
+}
+
+func (g *Game) roundHash() []byte {
+	return g.roundHashes[g.roundIndex : g.roundIndex+nOfBytesInHash]
 }
