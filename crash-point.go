@@ -21,12 +21,11 @@ const instantCrash float64 = 1.0
 // played yet and returns true. If there are no not yet played rounds,
 // it returns false.
 func (g *Game) Next() bool {
-	if g.roundIndex < 0 {
+	if g.roundIndex <= 0 {
 		return false
 	}
 
 	g.roundIndex = g.roundIndex - nOfBytesInHash
-
 	return true
 }
 
