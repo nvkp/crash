@@ -5,7 +5,7 @@
 
 This package provides an implementation of the Crash game often offered by online casinos. The host of the game chooses any *seed*. This seed is hashed and the hashed seed is hashed again etc. until the number of generated hashes equals the chosen number of rounds. The host of the game can commit to a not (in the moment of choosing the seed) known number or any piece of data, and later use it as salt to prove that he had no control over what exact crash points would be generated for the game. 
 
-The last generated hash serves as the hash of the first game. Together with the optional salt it is passed to a function that has the crash point as the output. The host can also specify an instant crash rate *X* causing every *xth* round to instantly crash and generate a crash point of *1*. The inverted value of the instant crash rate more or less equals the resulting margin of the game.
+The last generated hash serves as the hash of the first round. Together with the optional salt it is passed to a function that has the crash point as the output. The host can also specify an instant crash rate *X* causing every *xth* round to instantly crash and generate a crash point of *1*. The inverted value of the instant crash rate more or less equals the resulting margin of the game.
 
 With this package, one can create a new game with an arbitrary number of rounds, seed to generate the round hashes and a salt to alter the calculated crash points. The package exposes functions to prove that previous rounds were *fair*, meaning their outcome could not be altered once the first round of the game started being played.
 
@@ -45,14 +45,14 @@ for g.Next() {
 }
 ```
 
-A crash point for any number of rounds can be verified. By calling `crash.Hash` with the given round hash we get the hash of the previous game and with the function `crash.CrashPoint`, given that we know the used salt and the instant crash rate, we can verify that the previously generated crash points are valid.
+A crash point for any number of rounds can be verified. By calling `crash.Hash` with the given round hash we get the hash of the previous round and with the function `crash.CrashPoint`, given that we know the used salt and the instant crash rate, we can verify that the previously generated crash points are valid.
 
 ```golang
 roundHash, err := hex.DecodeString(
     "94c1a1f23430dd9dbe78cc2ced06a2bb437c7a46ea378cfdfb2d051d5cf3f266",
 )
 
-prevGameCrashPoint := crash.CrashPoint(
+prevRoundCrashPoint := crash.CrashPoint(
     crash.Hash(roundHash),
     []byte("this is a salt"),
     30,
