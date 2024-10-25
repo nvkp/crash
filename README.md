@@ -17,6 +17,8 @@ To add this package as a dependency to you Golang module, run:
 go get github.com/nvkp/crash
 ```
 
+### Creating a New Game
+
 A new game can be created by saving the result of the `crash.New` function with a seed provided to generate the hash for each round. This generates a game of *100* rounds with the instant crash rate of *20*.
 
 ```golang
@@ -34,6 +36,8 @@ g, err := crash.New(
 )
 ```
 
+### Retrieving Crash Points
+
 Once a game is created, the crash points of individual rounds can be retrieved by iteration with the `crash.Game.Next` function. The function `crash.Game.CrashPoint` returns the hash of the given round and the calculated crash point.
 
 ```golang
@@ -44,6 +48,8 @@ for g.Next() {
     }
 }
 ```
+
+### Verifying Crash Points
 
 A crash point for any number of rounds can be verified. By calling `crash.Hash` with the given round hash we get the hash of the previous round and with the function `crash.CrashPoint`, given that we know the used salt and the instant crash rate, we can verify that the previously generated crash points are valid.
 
@@ -56,5 +62,27 @@ prevRoundCrashPoint := crash.CrashPoint(
     crash.Hash(roundHash),
     []byte("this is a salt"),
     30,
+)
+```
+
+### Persistence
+
+This package does not solve any persistence for you. Once the execution of the binary finishes, you no longer have access to the generated game. There are some features in this package that will help you manage the persitance on your own. Once a game is created, you can store a copy of the internal hash chain of the game and a number signaling the currently used point on the hash chain to a variable and persist this as you wish (a database, a file, etc.):
+
+```golang
+// store the hash chain and the round index
+hashChain, roundIndex := g.HashChain(), g.RoundIndex()
+```
+
+Once a new execution of the application starts, you can restore the game to the stored state by creating the game with the same options plus by providing the stored hash chain and the round index:
+
+```golang
+g, _ := crash.New(
+	[]byte("this is a seed"),
+	crash.WithSalt([]byte("this is a salt")),
+	crash.WithInstantCrashRate(30),
+	crash.WithRounds(50),
+	crash.WithHashChain(hashChain), // variable with loaded persisted data
+	crash.WithRoundIndex(roundIndex), // variable with loaded persisted data
 )
 ```
