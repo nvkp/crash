@@ -36,6 +36,12 @@ func New(
 		o(&g)
 	}
 
+	// return game as is if chain already set
+	if len(g.roundHashes) > 0 && g.roundIndex > 0 {
+		return &g, nil
+	}
+
+	// proceed to generate the hash chain otherwise
 	chain, err := hashChain(seed, g.nOfRounds)
 	if err != nil {
 		return nil, err
@@ -65,5 +71,25 @@ func WithRounds(n int) func(*Game) {
 func WithInstantCrashRate(rate int) func(*Game) {
 	return func(g *Game) {
 		g.instantCrashRate = rate
+	}
+}
+
+// WithHashChain sets custom hash chain for the game. This
+// can be used for loading a game from some persisted state.
+func WithHashChain(chain []byte) func(*Game) {
+	return func(g *Game) {
+		g.roundHashes = chain
+		if g.roundIndex > 0 {
+			return
+		}
+		g.roundIndex = len(chain)
+	}
+}
+
+// WithRoundIndex sets custom cursor to the hash chain. This
+// can be used for loading a game from some persisted state.
+func WithRoundIndex(roundIndex int) func(*Game) {
+	return func(g *Game) {
+		g.roundIndex = roundIndex
 	}
 }

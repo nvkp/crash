@@ -98,3 +98,42 @@ func TestVerifyGame(_ *testing.T) {
 		30,
 	)
 }
+
+func TestRestoreGame(t *testing.T) {
+	// create a new game
+	g, _ := crash.New(
+		[]byte("this is a seed"),
+		crash.WithSalt([]byte("this is a salt")),
+		crash.WithInstantCrashRate(30),
+		crash.WithRounds(50),
+	)
+
+	// play some four rounds
+	for i := 0; i < 4; i++ {
+		_ = g.Next()
+	}
+
+	// store the hash chain and the round index
+	hashChain, roundIndex := g.HashChain(), g.RoundIndex()
+
+	// store the crash point and the hash of the next round
+	_ = g.Next()
+	crashPoint, hash, _ := g.CrashPoint()
+
+	// create a new game from the stored hash chain and round index
+	f, _ := crash.New(
+		[]byte("this is a seed"),
+		crash.WithSalt([]byte("this is a salt")),
+		crash.WithInstantCrashRate(30),
+		crash.WithRounds(50),
+		crash.WithHashChain(hashChain),
+		crash.WithRoundIndex(roundIndex),
+	)
+
+	// play one round and the crash point and the round hash of
+	// the new game should equal the original game
+	_ = f.Next()
+	c, h, _ := f.CrashPoint()
+	equal(t, crashPoint, c, "not matching crash point")
+	equal(t, hash, h, "not matching round hash")
+}
